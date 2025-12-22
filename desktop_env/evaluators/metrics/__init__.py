@@ -156,5 +156,8 @@ from .vscode import (
 )
 
 
+from .cad import check_step_bounding_box
+
+
 def infeasible():
     pass
