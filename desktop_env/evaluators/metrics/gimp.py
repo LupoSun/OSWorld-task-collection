@@ -800,6 +800,135 @@ def check_sharper(src_path, tgt_path):
     return 1.0 if sharpness_src > sharpness_tgt else 0.0
 
 
+def check_pbr_materials(files_list: List[str], expected_list: List[str] = None) -> float:
+    """
+    Check if the PBR materials (Diffuse, Roughness, Normal) are created correctly.
+    Expects files_list to contain paths to [Diffuse, Roughness, Normal].
+    """
+    import logging
+    from PIL import Image, ImageStat
+
+    if not files_list or len(files_list) != 3:
+        logging.error(f"Expected 3 files, got {len(files_list) if files_list else 0}")
+        return 0.0
+
+    # Map indices to names for logging
+    file_names = ["Concrete_Diffuse.png", "Concrete_Roughness.png", "Concrete_Normal.png"]
+    
+    for i, file_path in enumerate(files_list):
+        current_name = file_names[i]
+        
+        if not file_path or not os.path.exists(file_path):
+            logging.error(f"File {current_name} does not exist (path: {file_path}).")
+            return 0.0
+            
+        try:
+            # Safely open image
+            img = safe_open_image_with_retry(file_path)
+            if img is None:
+                return 0.0
+
+            # Check resolution
+            if img.size != (2048, 2048):
+                 logging.error(f"File {current_name} has wrong resolution: {img.size}, expected (2048, 2048).")
+                 img.close()
+                 return 0.0
+                 
+            # Basic content checks
+            if i == 0: # Diffuse
+                # Check for seamlessness
+                # We use the 2x2 tile edge detection method requested.
+                is_seamless, ratio = check_seamlessness(file_path)
+                if not is_seamless:
+                     logging.warning(f"Diffuse map does not appear seamless. Edge/Global Ratio: {ratio:.2f} (Threshold 1.4)")
+                     img.close()
+                     return 0.0
+
+            if i == 1: # Roughness
+                # Check for low saturation (should be grayscale)
+                hsv = img.convert('HSV')
+                s_mean = measure_saturation(hsv)
+                if s_mean > 20: # Allow some tolerance
+                     logging.warning(f"Roughness map has high saturation: {s_mean}")
+                     img.close()
+                     return 0.0
+
+            if i == 2: # Normal
+                 # Check if it looks like a normal map (blue-ish)
+                 if img.mode != 'RGB':
+                     img_rgb = img.convert('RGB')
+                 else:
+                     img_rgb = img
+                 
+                 stat = ImageStat.Stat(img_rgb)
+                 means = stat.mean
+                 # Expect Blue channel to be dominant.
+                 # Grayscale images have R~=G~=B, so we must strictly require B > R and B > G by a margin.
+                 # Normal maps typically have a blue base around 128, 128, 255.
+                 margin = 20
+                 if means[2] <= means[0] + margin or means[2] <= means[1] + margin:
+                     logging.warning(f"Normal map does not look blue-dominant enough: {means}")
+                     img.close()
+                     return 0.0
+            
+            img.close()
+
+        except Exception as e:
+            logging.error(f"Error checking file {current_name}: {e}")
+            return 0.0
+
+    return 1.0
+
+
+def check_seamlessness(image_path: str, threshold: float = 1.4) -> (bool, float):
+    """
+    Checks if an image is seamless by tiling it 2x2 and checking edge intensity at seams.
+    Returns (is_seamless, ratio).
+    ratio = seam_edge_intensity / global_edge_intensity
+    If ratio > threshold, it's likely not seamless.
+    """
+    try:
+        import cv2
+        img = Image.open(image_path).convert('L')
+        w, h = img.size
+        
+        # Create 2x2 tiling
+        tiled = Image.new('L', (w*2, h*2))
+        tiled.paste(img, (0, 0))
+        tiled.paste(img, (w, 0))
+        tiled.paste(img, (0, h))
+        tiled.paste(img, (w, h))
+        
+        tiled_arr = np.array(tiled)
+        
+        # Apply Laplacian to detect edges
+        laplacian = cv2.Laplacian(tiled_arr, cv2.CV_64F)
+        laplacian_abs = np.abs(laplacian)
+        
+        # Define seam regions
+        # Vertical seam is at column w
+        # Horizontal seam is at row h
+        margin = 2
+        
+        v_seam_region = laplacian_abs[:, w-margin:w+margin]
+        h_seam_region = laplacian_abs[h-margin:h+margin, :]
+        
+        seam_mean = (np.mean(v_seam_region) + np.mean(h_seam_region)) / 2
+        global_mean = np.mean(laplacian_abs)
+        
+        if global_mean == 0:
+            return True, 0.0
+            
+        ratio = seam_mean / global_mean
+        
+        return ratio < threshold, ratio
+        
+    except Exception as e:
+        logging.error(f"Error in check_seamlessness: {e}")
+        return False, 999.0
+
+
+
 def check_image_file_size(src_path, rule):
     """
     Check if the size of the src image within 500KB

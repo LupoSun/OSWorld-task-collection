@@ -1,5 +1,6 @@
 {
-  "new_tasks": [
-    "example"
-  ]
+  "task_6_pbr_material": {
+    "config_path": "evaluation_examples/examples/new_tasks/task_6_pbr_material.json",
+    "result_dir": "results_new_tasks"
+  }
 }
