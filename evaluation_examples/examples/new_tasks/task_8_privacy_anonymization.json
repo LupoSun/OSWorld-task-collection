@@ -1,0 +1,98 @@
+{
+    "id": "task_8_privacy_anonymization",
+    "instruction": "You are working on a project where site photos need to be anonymized before sharing. Specifically, any photo containing a visible face must be processed.\n\nYour task is to:\n1. Open the folder `~/Documents/Site_Photos`.\n2. Identify which photos contain people's faces.\n3. Open those specific photos in GIMP and anonymize the faces (blur or pixelate them so they are unrecognizable).\n4. Export the anonymized images to the **Desktop** with the suffix `_Anon`. For example, if the original is `IMG_Office_02.png`, save it as `IMG_Office_02_Anon.png`.\n5. Do NOT generate files for images that do not contain faces.",
+    "config": [
+        {
+            "type": "execute",
+            "parameters": {
+                "command": "mkdir -p ~/Documents/Site_Photos",
+                "shell": true
+            }
+        },
+        {
+            "type": "download",
+            "parameters": {
+                "files": [
+                    {
+                        "url": "https://drive.google.com/uc?id=1DQrCVKHCnKhuIYrdzZ4qR3syBCdLD-9U&export=download",
+                        "path": "~/Documents/Site_Photos/IMG_Office_01.png"
+                    },
+                    {
+                        "url": "https://drive.google.com/uc?id=1ZkG0x4sVrXEsfKbLv_M-tZhKg0LEEWLE&export=download",
+                        "path": "~/Documents/Site_Photos/IMG_Office_02.png"
+                    },
+                    {
+                        "url": "https://drive.google.com/uc?id=1vx8UgmPBpeuJpT0esBmsaFPMbT3Yv-zw&export=download",
+                        "path": "~/Documents/Site_Photos/IMG_Office_03.png"
+                    },
+                    {
+                        "url": "https://drive.google.com/uc?id=1m0q58O9FGu6-sClrkqBWY7AXgE4s4SXO&export=download",
+                        "path": "~/Documents/Site_Photos/IMG_Office_04.png"
+                    },
+                    {
+                        "url": "https://drive.google.com/uc?id=179mpBVowTuTE4qH4uAqv9OduaEF7Qc2S&export=download",
+                        "path": "~/Documents/Site_Photos/IMG_Office_05.png"
+                    }
+                ]
+            }
+        }
+    ],
+    "evaluator": {
+        "func": [
+            "check_face_count",
+            "check_file_not_exists",
+            "check_face_count",
+            "check_face_count",
+            "check_file_not_exists"
+        ],
+        "result": [
+            {
+                "type": "vm_file",
+                "path": "~/Desktop/IMG_Office_01_Anon.png",
+                "dest": "IMG_Office_01_Anon.png"
+            },
+            {
+                "type": "vm_file",
+                "path": "~/Desktop/IMG_Office_02_Anon.png",
+                "dest": "IMG_Office_02_Anon.png"
+            },
+            {
+                "type": "vm_file",
+                "path": "~/Desktop/IMG_Office_03_Anon.png",
+                "dest": "IMG_Office_03_Anon.png"
+            },
+            {
+                "type": "vm_file",
+                "path": "~/Desktop/IMG_Office_04_Anon.png",
+                "dest": "IMG_Office_04_Anon.png"
+            },
+            {
+                "type": "vm_file",
+                "path": "~/Desktop/IMG_Office_05_Anon.png",
+                "dest": "IMG_Office_05_Anon.png"
+            }
+        ],
+        "expected": [
+            {
+                "type": "rule",
+                "rules": 0
+            },
+            {
+                "type": "rule",
+                "rules": "ignored"
+            },
+            {
+                "type": "rule",
+                "rules": 0
+            },
+            {
+                "type": "rule",
+                "rules": 0
+            },
+            {
+                "type": "rule",
+                "rules": "ignored"
+            }
+        ]
+    }
+}

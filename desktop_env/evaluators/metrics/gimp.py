@@ -797,7 +797,74 @@ def check_sharper(src_path, tgt_path):
     """
     sharpness_src = calculate_image_sharpness(src_path)
     sharpness_tgt = calculate_image_sharpness(tgt_path)
-    return 1.0 if sharpness_src > sharpness_tgt else 0.0
+
+def check_file_not_exists(file_path, rule=None):
+    """
+    Check if the file does NOT exist in the directory.
+    If file_path is None (get_vm_file failed to find it), that means it doesn't exist -> PASS.
+    """
+    if file_path is None:
+        return 1.0
+    # If the file exists in cache, it means it existed on VM
+    return 0.0 if os.path.isfile(file_path) else 1.0
+
+
+def check_face_count(image_path: str, expected_count: int = 0) -> float:
+    """
+    Check if the number of faces in the image matches the expected count.
+    Uses OpenCV Haar Cascade classifier.
+    """
+    if not image_path:
+        return 0.0
+    
+    # Check if file exists first
+    if not os.path.isfile(image_path):
+        # If expecting 0 faces and file doesn't exist, technically valid? 
+        # No, the instructions imply an output file MUST exist but contain 0 faces (anonymized).
+        # But if checking non-existence for negative cases, use check_file_not_exists instead.
+        # This metric assumes the file SHOULD exist and we are checking content.
+        return 0.0
+
+    try:
+        # Load image
+        img = cv2.imread(image_path)
+        if img is None:
+            logging.error(f"Failed to load image: {image_path}")
+            return 0.0
+
+        # Convert to grayscale
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+        # Load Haar Cascade
+        # We assume standard opencv-python installation includes this path
+        cascade_path = cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
+        face_cascade = cv2.CascadeClassifier(cascade_path)
+        
+        if face_cascade.empty():
+            logging.error("Failed to load Haar Cascade XML")
+            return 0.0
+
+        # Detect faces
+        faces = face_cascade.detectMultiScale(
+            gray,
+            scaleFactor=1.1,
+            minNeighbors=5,
+            minSize=(30, 30),
+            flags=cv2.CASCADE_SCALE_IMAGE
+        )
+
+        detected_count = len(faces)
+        logging.info(f"Detected {detected_count} faces in {image_path}. Expected: {expected_count}")
+
+        if detected_count == expected_count:
+            return 1.0
+        else:
+            return 0.0
+            
+    except Exception as e:
+        logging.error(f"Error in check_face_count: {e}")
+        return 0.0
+
 
 
 def check_image_file_size(src_path, rule):
