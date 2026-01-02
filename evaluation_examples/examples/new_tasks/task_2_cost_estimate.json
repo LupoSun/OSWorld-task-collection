@@ -1,0 +1,101 @@
+{
+    "id": "task_2_cost_estimate",
+    "snapshot": "libreoffice_calc",
+    "instruction": "You have a Room Schedule 'Room_Area_Schedule.xlsx' with areas and a separate PDF Specification 'Finish_Specs.pdf' listing finish codes and unit costs. Create a cost estimate.\n\nDetailed Instructions:\n1. Open 'Finish_Specs.pdf' to see the Finish Code and Unit Cost ($/sf) for each Room Type.\n2. Open 'Room_Area_Schedule.xlsx' in LibreOffice Calc.\n3. Add two new columns: 'Finish Code' and 'Total Cost'.\n4. For each row, fill in the 'Finish Code' corresponding to the 'Room Name' (from the PDF).\n5. In the 'Total Cost' column, write a formula to calculate the cost: Area * Unit_Cost.\n6. At the bottom of the 'Total Cost' column, use the SUM formula to calculate the Grand Total.\n7. Format the Cost columns as Currency.\n8. Save the file as 'Cost_Estimate.xlsx' to the Desktop (~/Desktop).",
+    "source": "AEC_task_proposals",
+    "config": [
+        {
+            "type": "download",
+            "parameters": {
+                "files": [
+                    {
+                        "url": "https://drive.google.com/uc?id=1tGGI2-sFoqdaTpjw-k6bfW3W9f77kUwQ&export=download",
+                        "path": "~/Documents/Finish_Specs.pdf"
+                    },
+                    {
+                        "url": "https://drive.google.com/uc?id=18luyBNpgkRDIZ06JnK6cmAGcAtVgYMzl&export=download",
+                        "path": "~/Documents/Room_Area_Schedule.xlsx"
+                    }
+                ]
+            }
+        },
+        {
+            "type": "launch",
+            "parameters": {
+                "command": [
+                    "libreoffice",
+                    "~/Documents/Room_Area_Schedule.xlsx"
+                ]
+            }
+        }
+    ],
+    "trajectory": "trajectories/",
+    "related_apps": [
+        "libreoffice_calc",
+        "evince"
+    ],
+    "evaluator": {
+        "func": [
+            "check_excel_value",
+            "check_excel_value",
+            "check_excel_formula",
+            "check_excel_value"
+        ],
+        "result": [
+            {
+                "type": "vm_file",
+                "path": "~/Desktop/Cost_Estimate.xlsx",
+                "dest": "Cost_Estimate.xlsx"
+            },
+            {
+                "type": "vm_file",
+                "path": "~/Desktop/Cost_Estimate.xlsx",
+                "dest": "Cost_Estimate.xlsx"
+            },
+            {
+                "type": "vm_file",
+                "path": "~/Desktop/Cost_Estimate.xlsx",
+                "dest": "Cost_Estimate.xlsx"
+            },
+            {
+                "type": "vm_file",
+                "path": "~/Desktop/Cost_Estimate.xlsx",
+                "dest": "Cost_Estimate.xlsx"
+            }
+        ],
+        "expected": [
+            {
+                "type": "rule",
+                "rules": {
+                    "sheet": "Sheet1",
+                    "cell": "D2",
+                    "value": "CER-01"
+                }
+            },
+            {
+                "type": "rule",
+                "rules": {
+                    "sheet": "Sheet1",
+                    "cell": "E75",
+                    "type": "currency"
+                }
+            },
+            {
+                "type": "rule",
+                "rules": {
+                    "sheet": "Sheet1",
+                    "cell": "E75",
+                    "formula_starts_with": "=SUM"
+                }
+            },
+            {
+                "type": "rule",
+                "rules": {
+                    "sheet": "Sheet1",
+                    "cell": "E75",
+                    "value": 152262.5
+                }
+            }
+        ]
+    }
+}
