@@ -102,7 +102,7 @@ from .gimp import (
     check_image_file_size
 )
 from .libreoffice import check_libre_locale
-from .others import compare_epub, check_mp3_meta
+from .file_struct import check_folder_structure
 from .pdf import check_pdf_pages
 from .slides import (
     check_presenter_console_disable,

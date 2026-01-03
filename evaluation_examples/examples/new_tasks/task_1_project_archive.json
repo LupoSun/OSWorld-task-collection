@@ -1,0 +1,65 @@
+{
+    "id": "task_1_project_archive",
+    "snapshot": "ubuntu",
+    "instruction": "I have opened the download page for 'Project_Assets.zip' in the browser. Please:\n1. Download the file 'Project_Assets.zip'.\n2. Unzip it to a folder named 'Project_Assets' on the Desktop.\n3. Organize the files into a structured archive named 'UrbanComplex' on the Desktop with the following subfolders:\n   - 01_Models: .3dm files\n   - 02_Diagrams: .ai and .png files\n   - 03_StructuralAnalyses: PDF files with 'Structural' or 'Narrative'\n   - 04_FloorPlans: PDF files starting with 'F' or 'floorplan'\n   - 05_Renderings: .jpg files\n   - 06_TablesCharts: PDF files with 'area table' or 'SEC_ELEVATOR'\n\nCreate the folders if they don't exist.",
+    "source": "AEC_task_proposals",
+    "config": [
+        {
+            "type": "launch",
+            "parameters": {
+                "command": [
+                    "google-chrome",
+                    "https://drive.google.com/uc?id=1lEfvdXRSB3dTXhMrNhEwS-ffBG1016GU&export=download"
+                ]
+            }
+        }
+    ],
+    "trajectory": "trajectories/",
+    "related_apps": [
+        "nautilus"
+    ],
+    "evaluator": {
+        "func": "check_folder_structure",
+        "result": {
+            "type": "vm_command_line",
+            "command": "bash -c \"cd ~/Desktop/UrbanComplex 2>/dev/null && find . -maxdepth 4 -not -path '*/.*'\""
+        },
+        "expected": {
+            "type": "rule",
+            "rules": {
+                "expected_files": [
+                    "01_Models/Podium.3dm",
+                    "01_Models/\u4f53\u91cf\u6a21\u578b.3dm",
+                    "02_Diagrams/Flow Diagram.ai",
+                    "02_Diagrams/Illu 160321_gold.png",
+                    "02_Diagrams/Lighting 210322.png",
+                    "02_Diagrams/\u529f\u80fd\u5206\u533a.png",
+                    "02_Diagrams/\u57ce\u5e02\u754c\u9762\u4e0e\u4eba\u6d41\u5f15\u5bfc.png",
+                    "02_Diagrams/\u7f51\u683c.png",
+                    "02_Diagrams/\u89c6\u7ebf\u5206\u6790.png",
+                    "03_StrucuralAnalyses/20210207_666_Structural+Design+Narrative-r1_without footer.pdf",
+                    "03_StrucuralAnalyses/Structural Narrative-baoneng 420_header_footer_removed.pdf",
+                    "04_FloorPlans/F01-488.pdf",
+                    "04_FloorPlans/F1.pdf",
+                    "04_FloorPlans/F134.pdf",
+                    "04_FloorPlans/F1_1.pdf",
+                    "04_FloorPlans/F45.pdf",
+                    "04_FloorPlans/F56-488.pdf",
+                    "04_FloorPlans/F89-488.pdf",
+                    "04_FloorPlans/floorplan 1.pdf",
+                    "04_FloorPlans/floorplan 2.pdf",
+                    "05_Renderings/C02-1-PS.jpg",
+                    "05_Renderings/C03-666-C.jpg",
+                    "05_Renderings/c01.jpg",
+                    "05_Renderings/c01_Old.jpg",
+                    "05_Renderings/\u5546\u4e1a\u5ba4\u5185.jpg",
+                    "05_Renderings/\u88d9\u623f-C.jpg",
+                    "06_TablesCharts/210309_HEX__area table_revised.pdf",
+                    "06_TablesCharts/210309_HEX__area table_revised2.pdf",
+                    "06_TablesCharts/SEC_ELEVATOR SYSTEM.pdf",
+                    "06_TablesCharts/SEC_ELEVATOR SYSTEM_488.pdf"
+                ]
+            }
+        }
+    }
+}
