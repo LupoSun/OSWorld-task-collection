@@ -103,7 +103,7 @@ from .gimp import (
 )
 from .libreoffice import check_libre_locale
 from .others import compare_epub, check_mp3_meta
-from .pdf import check_pdf_pages
+from .pdf import check_pdf_pages, check_pdf_size, check_pdf_text_content, check_pdf_image_count, check_pdf_visual_similarity, check_pdf_text_position, check_presentation_file_exists
 from .slides import (
     check_presenter_console_disable,
     check_image_stretch_and_center,

@@ -1,0 +1,89 @@
+{
+    "id": "task_7_presentation",
+    "snapshot": "ubuntu",
+    "instruction": "You are preparing for a design review and need to assemble a 2-page presentation board.\n\nInstructions:\n1. Unzip 'task_7_assets.zip' on the Desktop.\n2. Open LibreOffice Impress. Select \"Cancel\" on the template dialog to start blank.\n3. Go to Slide > Slide Properties. Set Format to Screen 4:3 and Orientation to Landscape.\n4. Slide 1:\n   - Main_Render.jpg (Left Half)\n   - Ground_Floor_Plan.png (Top-Right)\n   - Section_AA.png (Bottom-Right)\n   - Title: 'Community Center - Proposal' (Center, Bold)\n5. Slide 2:\n   - Elevation_North.png (Top Half)\n   - Interior_Perspective.jpg (Bottom-Left)\n   - Material_Palette.jpg (Bottom-Right)\n6. Save the project as 'Presentation_Set.odp' and Export as 'Presentation_Set.pdf' to Desktop.",
+    "source": "AEC_task_proposals",
+    "config": [
+        {
+            "type": "download",
+            "parameters": {
+                "files": [
+                    {
+                        "url": "https://drive.google.com/uc?id=1UtpSRGmY9Ins5dajdcGlIcGnSg2YOX0O&export=download",
+                        "path": "~/Desktop/task_7_assets.zip"
+                    }
+                ]
+            }
+        }
+    ],
+    "evaluator": {
+        "func": [
+            "check_presentation_file_exists",
+            "check_pdf_pages",
+            "check_pdf_size",
+            "check_pdf_text_position",
+            "check_pdf_visual_similarity"
+        ],
+        "result": [
+            {
+                "type": "vm_file",
+                "path": "~/Desktop/Presentation_Set.odp",
+                "dest": "submission.odp"
+            },
+            {
+                "type": "vm_file",
+                "path": "~/Desktop/Presentation_Set.pdf",
+                "dest": "submission.pdf"
+            },
+            {
+                "type": "vm_file",
+                "path": "~/Desktop/Presentation_Set.pdf",
+                "dest": "submission.pdf"
+            },
+            {
+                "type": "vm_file",
+                "path": "~/Desktop/Presentation_Set.pdf",
+                "dest": "submission.pdf"
+            },
+            {
+                "type": "vm_file",
+                "path": "~/Desktop/Presentation_Set.pdf",
+                "dest": "submission.pdf"
+            }
+        ],
+        "expected": [
+            {
+                "type": "rule",
+                "rules": {}
+            },
+            {
+                "type": "rule",
+                "rules": {
+                    "ref_value": 2,
+                    "relation": "eq"
+                }
+            },
+            {
+                "type": "rule",
+                "rules": {
+                    "format": "4:3"
+                }
+            },
+            {
+                "type": "rule",
+                "rules": {
+                    "text": "Community Center - Proposal",
+                    "page_index": 0,
+                    "region": "center"
+                }
+            },
+            {
+                "type": "rule",
+                "rules": {
+                    "ground_truth_path": "https://drive.google.com/uc?id=16YIEIpaxbiiF3Z-SmO2l3N19bQYh2QX1&export=download",
+                    "threshold": 0.8
+                }
+            }
+        ]
+    }
+}
