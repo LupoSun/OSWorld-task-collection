@@ -1,0 +1,55 @@
+{
+    "id": "task_4_render_post_process",
+    "snapshot": "ubuntu",
+    "instruction": "Your raw 3D render looks flat. You need to composite it with other passes to make it pop for a client presentation.\n\nInstructions:\n1. Open `Render_raw.png`, `Render_materialID.png`, `Render_Ao.png`, and `Sky_background.png` in GIMP.\n2. Use the `Render_materialID.png` (Where sky is **Black**) to create a selection using the **Select by Color Tool**.\n3. **Invert the selection** so the building is selected.\n4. Apply a **Layer Mask** (from Selection) to the `Render_raw.png` layer to mask out the old sky.\n5. Add `Sky_background.png` as a layer *behind* the masked building layer.\n6. Add `Render_Ao.png` as a new layer on top. Set its Blending Mode to 'Multiply' and Opacity to **95%**.\n7. Go to `Colors > Levels` on the composite. Set the **Input Black Point** to `25` and the **Input White Point** to `230`.\n8. Export the final image as `Render_final.png` to the Desktop using **default settings**.",
+    "source": "AEC_task_proposals",
+    "config": [
+        {
+            "type": "download",
+            "parameters": {
+                "files": [
+                    {
+                        "url": "https://drive.google.com/uc?id=1NyetJK0alQlPkX_I1Agj5ejE9xXbYsff&export=download",
+                        "path": "~/Desktop/Render_raw.png"
+                    },
+                    {
+                        "url": "https://drive.google.com/uc?id=1p-gBIeWD7RtbhN3AKxS6ZMmdhP1ELIax&export=download",
+                        "path": "~/Desktop/Render_materialID.png"
+                    },
+                    {
+                        "url": "https://drive.google.com/uc?id=10_-E-_PYdp73Y4Nxgo8butSDHoVhRK7-&export=download",
+                        "path": "~/Desktop/Render_Ao.png"
+                    },
+                    {
+                        "url": "https://drive.google.com/uc?id=1IqHHvuDhpewFJQ10k5B7rP9OXlhzocgq&export=download",
+                        "path": "~/Desktop/Sky_background.png"
+                    }
+                ]
+            }
+        },
+        {
+            "type": "launch",
+            "parameters": {
+                "command": [
+                    "gimp",
+                    "~/Desktop/Render_raw.png"
+                ]
+            }
+        }
+    ],
+    "evaluator": {
+        "func": "check_structure_sim_downscale",
+        "result": {
+            "type": "vm_file",
+            "path": "~/Desktop/Render_final.png",
+            "dest": "submission.png"
+        },
+        "expected": {
+            "type": "rule",
+            "rules": {
+                "ground_truth_path": "https://drive.google.com/uc?id=1K0hIktNczizI7T3rJ1DQA7rgwpXaoKzh&export=download",
+                "threshold": 0.92
+            }
+        }
+    }
+}

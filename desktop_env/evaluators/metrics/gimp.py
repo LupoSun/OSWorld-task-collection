@@ -799,6 +799,117 @@ def check_sharper(src_path, tgt_path):
     sharpness_tgt = calculate_image_sharpness(tgt_path)
     return 1.0 if sharpness_src > sharpness_tgt else 0.0
 
+def check_structure_sim_downscale(src_path, tgt_path, **options):
+    """
+    Check structure similarity after downscaling to a stable width (200px).
+    Handles remote URLs for tgt_path.
+    """
+    import requests
+    import tempfile
+    
+    threshold = options.get('threshold', 0.9)
+    
+    if src_path is None or tgt_path is None:
+        return 0.
+
+    # Handle if tgt_path is a dictionary (from type: rule)
+    if isinstance(tgt_path, dict):
+        threshold = tgt_path.get('threshold', threshold)
+        tgt_path = tgt_path.get('ground_truth_path') 
+        if tgt_path is None:
+            logging.error("tgt_path dict missing 'ground_truth_path'")
+            return 0.
+        
+    # Handle remote URL for tgt_path
+    temp_tgt = None
+    if tgt_path.startswith("http"):
+        try:
+            # Create temp file with proper extension (assuming PNG based on task)
+            fd, temp_name = tempfile.mkstemp(suffix=".png")
+            os.close(fd)
+            temp_tgt = temp_name
+            
+            logging.info(f"Downloading GT from {tgt_path} to {temp_tgt}")
+            response = requests.get(tgt_path)
+            if response.status_code == 200:
+                with open(temp_tgt, 'wb') as f:
+                    f.write(response.content)
+                tgt_path = temp_tgt
+            else:
+                logging.error(f"Failed to download GT: {response.status_code}")
+                os.remove(temp_tgt)
+                return 0.
+        except Exception as e:
+            logging.error(f"Error downloading GT: {e}")
+            if temp_tgt and os.path.exists(temp_tgt):
+                os.remove(temp_tgt)
+            return 0.
+
+    try:
+        img_src = Image.open(src_path).convert('RGB')
+        img_tgt = Image.open(tgt_path).convert('RGB')
+        
+        # Downscale to width 200
+        target_width = 200
+        
+        # Resize Src
+        ratio_src = target_width / img_src.width
+        h_src = int(img_src.height * ratio_src)
+        img_src = img_src.resize((target_width, h_src), Image.Resampling.LANCZOS)
+        
+        # Resize Tgt
+        ratio_tgt = target_width / img_tgt.width
+        h_tgt = int(img_tgt.height * ratio_tgt)
+        img_tgt = img_tgt.resize((target_width, h_tgt), Image.Resampling.LANCZOS)
+        
+        # Ensure sizes match (if aspect ratios differed slightly)
+        if img_src.size != img_tgt.size:
+            img_src = img_src.resize(img_tgt.size, Image.Resampling.LANCZOS)
+            
+        structure_same = structure_check_by_ssim(img_src, img_tgt, threshold=threshold)
+        
+        # Secondary Check: High-Res MSE for detail preservation
+        # Resize to 1024px width (or keep original if smaller, but these are 5K)
+        detail_width = 1024
+        
+        # Reload original images (or use high-res copies if I hadn't overwritten them? 
+        # I overwrote img_src/tgt variables. I need to reload or copy before resize)
+        # To avoid re-opening, I'll modify logic to open once, then resize copies.
+        
+        # Actually, simpler: just re-open or reload since they are local/temp files now
+        img_src_full = Image.open(src_path).convert('RGB')
+        img_tgt_full = Image.open(tgt_path).convert('RGB')
+        
+        ratio_src_d = detail_width / img_src_full.width
+        h_src_d = int(img_src_full.height * ratio_src_d)
+        img_src_detail = img_src_full.resize((detail_width, h_src_d), Image.Resampling.LANCZOS)
+        
+        ratio_tgt_d = detail_width / img_tgt_full.width
+        h_tgt_d = int(img_tgt_full.height * ratio_tgt_d)
+        img_tgt_detail = img_tgt_full.resize((detail_width, h_tgt_d), Image.Resampling.LANCZOS)
+        
+        # MSE Calculation
+        arr_src = np.array(img_src_detail, dtype=np.float32) / 255.0
+        arr_tgt = np.array(img_tgt_detail, dtype=np.float32) / 255.0
+        
+        mse = np.mean((arr_src - arr_tgt) ** 2)
+        mse_threshold = 0.01  # Strict threshold for detail
+        
+        detail_same = mse < mse_threshold
+        logging.info(f"SSIM(200px): {structure_same}, MSE(1024px): {mse} (Limit {mse_threshold})")
+        
+        # Cleanup
+        if temp_tgt and os.path.exists(temp_tgt):
+            os.remove(temp_tgt)
+            
+        return 1.0 if (structure_same and detail_same) else 0.0
+        
+    except Exception as e:
+        logging.error(f"check_structure_sim_downscale error: {e}")
+        if temp_tgt and os.path.exists(temp_tgt):
+            os.remove(temp_tgt)
+        return 0.0
+
 
 def check_image_file_size(src_path, rule):
     """
