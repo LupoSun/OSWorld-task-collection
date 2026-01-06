@@ -101,7 +101,10 @@ from .gimp import (
     check_sharper,
     check_image_file_size
 )
-from .libreoffice import check_libre_locale
+from .libreoffice import (
+    check_libre_locale,
+    check_schedule_recovery
+)
 from .others import compare_epub, check_mp3_meta
 from .pdf import check_pdf_pages
 from .slides import (

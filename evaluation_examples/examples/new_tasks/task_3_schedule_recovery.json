@@ -1,0 +1,41 @@
+{
+    "id": "task_3_schedule_recovery",
+    "config": [
+        {
+            "type": "download",
+            "parameters": {
+                "files": [
+                    {
+                        "url": "https://drive.google.com/uc?id=1MWG-yPwqEOinfzw5djbNHqZE8uDmSGOA&export=download",
+                        "path": "~/Desktop/Construction_Schedule.ods"
+                    },
+                    {
+                        "url": "https://drive.google.com/uc?id=1c5XjBDPRj5o8kp8cOpNQBqm79OIozq-Q&export=download",
+                        "path": "~/Desktop/Scenario.txt"
+                    }
+                ]
+            }
+        },
+        {
+            "type": "launch",
+            "parameters": {
+                "command": "libreoffice --calc ~/Desktop/Construction_Schedule.ods"
+            }
+        }
+    ],
+    "instruction": "Open the `Construction_Schedule.ods` on the Desktop. Read the `Scenario.txt` to understand the Gantt requirements and delay. Update the start and end dates. Fill in the Gantt Chart grid (columns H-AA) with 'X' for active work days. Save the final file as `Updated_Schedule.ods` on the Desktop.",
+    "evaluator": {
+        "func": "check_schedule_recovery",
+        "result": {
+            "type": "vm_file",
+            "path": "~/Desktop/Updated_Schedule.ods",
+            "dest": "Updated_Schedule.ods"
+        },
+        "expected": {
+            "type": "rule",
+            "rules": {
+                "ground_truth": "https://drive.google.com/uc?id=1WxO05Iv_fxLU6QSFEDzOb0LkGgV2FiAY&export=download"
+            }
+        }
+    }
+}
